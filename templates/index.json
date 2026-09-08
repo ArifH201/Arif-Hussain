@@ -297,10 +297,10 @@
       "type": "custom-banner",
       "name": "Custom Banner",
       "settings": {
-        "heading": "Browse our latest products",
-        "button_text": "Shop all",
-        "button_link": "",
-        "background_color": "#D62828"
+        "heading": "The Gift Guide",
+        "description": "<p>Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season.</p>",
+        "button_text": "Shop now",
+        "button_link": ""
       }
     }
   },
