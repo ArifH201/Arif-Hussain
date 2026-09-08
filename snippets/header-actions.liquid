@@ -128,13 +128,13 @@
     </button>
   {% else %}
     <a
-      href="{{ routes.cart_url }}"
-      class="header-actions__action action__cart{% if display_style == 'text' %} header-actions__text-style{% endif %}"
-      aria-label="{{ 'accessibility.cart' | t }}"
-      aria-describedby="cart-bubble-text"
-    >
-      {{ cart_icon }}
-    </a>
+  href="{{ routes.cart_url }}"
+  class="header-actions__action action__cart{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+  aria-label="{{ 'accessibility.cart' | t }}"
+  aria-describedby="cart-bubble-text"
+>
+  {{ cart_icon }}
+</a>
   {% endif %}
 
   <span
