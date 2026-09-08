@@ -302,11 +302,65 @@
         "button_text": "Shop now",
         "button_link": ""
       }
+    },
+    "custom_product_grid_QeE39W": {
+      "type": "custom-product-grid",
+      "blocks": {
+        "product_NizKpn": {
+          "type": "product",
+          "settings": {
+            "product": "ocean-blue-shirt"
+          }
+        },
+        "product_AKPw97": {
+          "type": "product",
+          "settings": {
+            "product": "classic-varsity-top"
+          }
+        },
+        "product_JCAjjq": {
+          "type": "product",
+          "settings": {
+            "product": "yellow-wool-jumper"
+          }
+        },
+        "product_HtLzfz": {
+          "type": "product",
+          "settings": {
+            "product": "floral-white-top"
+          }
+        },
+        "product_XAfAa3": {
+          "type": "product",
+          "settings": {
+            "product": "striped-silk-blouse"
+          }
+        },
+        "product_zkqYrn": {
+          "type": "product",
+          "settings": {
+            "product": "classic-leather-jacket"
+          }
+        }
+      },
+      "block_order": [
+        "product_NizKpn",
+        "product_AKPw97",
+        "product_JCAjjq",
+        "product_HtLzfz",
+        "product_XAfAa3",
+        "product_zkqYrn"
+      ],
+      "name": "Custom Product Grid",
+      "settings": {
+        "heading": "Tisso vison in the wild"
+      }
     }
   },
   "order": [
     "hero_jVaWmY",
     "product_list_fa6P9H",
-    "custom_banner_dGxqpJ"
+    "custom_banner_dGxqpJ",
+    "custom_product_grid_QeE39W"
   ]
 }
