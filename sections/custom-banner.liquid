@@ -3,11 +3,11 @@
   id="CustomBanner-{{ section.id }}"
 >
   <div class="custom-banner__artwork">
-    {{ 'gift-guide-artwork.png' | asset_url | image_tag:
-      loading: 'eager',
-      widths: '800, 1200, 1600, 2000',
-      alt: ''
-    }}
+    <img
+  src="{{ 'gift-guide-artwork.png' | asset_url }}"
+  alt=""
+  loading="eager"
+        >
   </div>
 
   <div class="custom-banner__content">
