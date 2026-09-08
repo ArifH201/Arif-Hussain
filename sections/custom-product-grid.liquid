@@ -1,0 +1,843 @@
+<section
+  class="custom-product-grid"
+  id="CustomProductGrid-{{ section.id }}"
+>
+  <div class="custom-product-grid__header">
+    <h2>{{ section.settings.heading | escape }}</h2>
+  </div>
+
+  <div class="custom-product-grid__grid">
+    {% for block in section.blocks %}
+      {% assign product = block.settings.product %}
+
+      {% if product != blank %}
+        <article
+          class="custom-product-grid__item"
+          {{ block.shopify_attributes }}
+        >
+          <button
+            type="button"
+            class="custom-product-grid__card"
+            data-product-index="{{ forloop.index0 }}"
+            aria-label="View {{ product.title | escape }}"
+          >
+            <div class="custom-product-grid__image-wrapper">
+              {% if product.featured_image %}
+                <img
+                  src="{{ product.featured_image | image_url: width: 1000 }}"
+                  alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                  loading="lazy"
+                  width="{{ product.featured_image.width }}"
+                  height="{{ product.featured_image.height }}"
+                >
+              {% endif %}
+
+              <span class="custom-product-grid__plus" aria-hidden="true">
+                +
+              </span>
+            </div>
+          </button>
+        </article>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Product popup -->
+  <div
+    class="product-modal"
+    id="ProductModal-{{ section.id }}"
+    hidden
+    aria-hidden="true"
+  >
+    <div class="product-modal__overlay" data-modal-close></div>
+
+    <div
+      class="product-modal__dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ProductModalTitle-{{ section.id }}"
+    >
+      <button
+        type="button"
+        class="product-modal__close"
+        data-modal-close
+        aria-label="Close product details"
+      >
+        ×
+      </button>
+
+      <div class="product-modal__content">
+        <div class="product-modal__image">
+          <img
+            id="ProductModalImage-{{ section.id }}"
+            src=""
+            alt=""
+          >
+        </div>
+
+        <div class="product-modal__details">
+          <h2 id="ProductModalTitle-{{ section.id }}"></h2>
+
+          <div
+            class="product-modal__price"
+            id="ProductModalPrice-{{ section.id }}"
+          ></div>
+
+          <div
+            class="product-modal__description"
+            id="ProductModalDescription-{{ section.id }}"
+          ></div>
+
+          <div
+            class="product-modal__variants"
+            id="ProductModalVariants-{{ section.id }}"
+          ></div>
+
+          <button
+            type="button"
+            class="product-modal__add"
+            id="ProductModalAdd-{{ section.id }}"
+          >
+            ADD TO CART
+          </button>
+
+          <p
+            class="product-modal__message"
+            id="ProductModalMessage-{{ section.id }}"
+            aria-live="polite"
+          ></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="application/json" id="ProductData-{{ section.id }}">
+[
+  {% assign first_product = true %}
+
+  {% for block in section.blocks %}
+    {% assign product = block.settings.product %}
+
+    {% if product != blank %}
+      {% unless first_product %},{% endunless %}
+      {% assign first_product = false %}
+
+      {
+        "id": {{ product.id | json }},
+        "title": {{ product.title | json }},
+        "description": {{ product.description | json }},
+        "image": {% if product.featured_image %}{{ product.featured_image | image_url: width: 1000 | json }}{% else %}null{% endif %},
+        "variants": [
+          {% for variant in product.variants %}
+            {
+              "id": {{ variant.id | json }},
+              "title": {{ variant.title | json }},
+              "price": {{ variant.price | json }},
+              "available": {{ variant.available | json }},
+              "options": {{ variant.options | json }}
+            }{% unless forloop.last %},{% endunless %}
+          {% endfor %}
+        ]
+      }
+    {% endif %}
+  {% endfor %}
+]
+</script>
+
+<script>
+  (() => {
+    const section = document.getElementById(
+      'CustomProductGrid-{{ section.id }}'
+    );
+
+    if (!section) return;
+
+    const modal = section.querySelector('.product-modal');
+    const modalImage = section.querySelector(
+      '#ProductModalImage-{{ section.id }}'
+    );
+    const modalTitle = section.querySelector(
+      '#ProductModalTitle-{{ section.id }}'
+    );
+    const modalPrice = section.querySelector(
+      '#ProductModalPrice-{{ section.id }}'
+    );
+    const modalDescription = section.querySelector(
+      '#ProductModalDescription-{{ section.id }}'
+    );
+    const variantsContainer = section.querySelector(
+      '#ProductModalVariants-{{ section.id }}'
+    );
+    const addButton = section.querySelector(
+      '#ProductModalAdd-{{ section.id }}'
+    );
+    const message = section.querySelector(
+      '#ProductModalMessage-{{ section.id }}'
+    );
+
+    const productDataElement = document.getElementById(
+      'ProductData-{{ section.id }}'
+    );
+
+    const products = productDataElement
+      ? JSON.parse(productDataElement.textContent)
+      : [];
+
+    let currentProduct = null;
+    let selectedVariant = null;
+
+    const formatMoney = (cents) => {
+      return new Intl.NumberFormat(
+        '{{ request.locale.iso_code }}',
+        {
+          style: 'currency',
+          currency: '{{ cart.currency.iso_code }}'
+        }
+      ).format(cents / 100);
+    };
+
+    const openModal = (productIndex) => {
+      currentProduct = products[productIndex];
+
+      if (!currentProduct) return;
+
+      selectedVariant =
+        currentProduct.variants.find((variant) => variant.available) ||
+        currentProduct.variants[0];
+
+      modalTitle.textContent = currentProduct.title;
+
+      modalPrice.textContent = selectedVariant
+        ? formatMoney(selectedVariant.price)
+        : '';
+
+      modalDescription.innerHTML =
+        currentProduct.description || '';
+
+      if (currentProduct.image) {
+        modalImage.src = currentProduct.image;
+        modalImage.alt = currentProduct.title;
+      }
+
+      renderVariants();
+
+      message.textContent = '';
+      addButton.disabled = !selectedVariant || !selectedVariant.available;
+
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('product-modal-open');
+    };
+
+    const closeModal = () => {
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('product-modal-open');
+      message.textContent = '';
+    };
+
+    const renderVariants = () => {
+      variantsContainer.innerHTML = '';
+
+      if (!currentProduct || !currentProduct.variants.length) {
+        return;
+      }
+
+      const optionCount =
+        currentProduct.variants[0].options.length;
+
+      if (optionCount === 0) {
+        return;
+      }
+
+      for (let optionIndex = 0; optionIndex < optionCount; optionIndex++) {
+        const optionValues = [
+          ...new Set(
+            currentProduct.variants
+              .map((variant) => variant.options[optionIndex])
+              .filter(Boolean)
+          )
+        ];
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'product-modal__variant';
+
+        const label = document.createElement('label');
+        label.textContent =
+          optionIndex === 0
+            ? 'Option'
+            : `Option ${optionIndex + 1}`;
+
+        const select = document.createElement('select');
+
+        optionValues.forEach((value) => {
+          const option = document.createElement('option');
+
+          option.value = value;
+          option.textContent = value;
+
+          if (
+            selectedVariant &&
+            selectedVariant.options[optionIndex] === value
+          ) {
+            option.selected = true;
+          }
+
+          select.appendChild(option);
+        });
+
+        select.addEventListener('change', () => {
+          updateSelectedVariant();
+        });
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(select);
+        variantsContainer.appendChild(wrapper);
+      }
+    };
+
+    const updateSelectedVariant = () => {
+      const selects = [
+        ...variantsContainer.querySelectorAll('select')
+      ];
+
+      const selectedOptions = selects.map(
+        (select) => select.value
+      );
+
+      selectedVariant = currentProduct.variants.find(
+        (variant) =>
+          variant.options.every(
+            (option, index) =>
+              option === selectedOptions[index]
+          )
+      );
+
+      if (selectedVariant) {
+        modalPrice.textContent =
+          formatMoney(selectedVariant.price);
+
+        addButton.disabled =
+          !selectedVariant.available;
+      } else {
+        modalPrice.textContent = '';
+        addButton.disabled = true;
+      }
+    };
+
+    /*
+      Special test requirement:
+
+      If the selected variant contains BOTH:
+      - Black
+      - Medium
+
+      automatically add Soft Winter Jacket.
+    */
+    const requiresWinterJacket = (variant) => {
+      if (!variant || !variant.options) return false;
+
+      const options = variant.options.map((option) =>
+        String(option).trim().toLowerCase()
+      );
+
+      return (
+        options.includes('black') &&
+        options.includes('medium')
+      );
+    };
+
+    const getWinterJacketVariant = async () => {
+      const response = await fetch(
+        '/products/soft-winter-jacket.js'
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          'Soft Winter Jacket product could not be found.'
+        );
+      }
+
+      const product = await response.json();
+
+      const availableVariant =
+        product.variants.find(
+          (variant) => variant.available
+        );
+
+      if (!availableVariant) {
+        throw new Error(
+          'Soft Winter Jacket is currently unavailable.'
+        );
+      }
+
+      return availableVariant.id;
+    };
+
+    const addToCart = async () => {
+      if (!selectedVariant || !selectedVariant.available) {
+        message.textContent =
+          'This variant is currently unavailable.';
+        return;
+      }
+
+      addButton.disabled = true;
+      message.textContent = 'Adding to cart...';
+
+      try {
+        const items = [
+          {
+            id: selectedVariant.id,
+            quantity: 1
+          }
+        ];
+
+        if (requiresWinterJacket(selectedVariant)) {
+          const jacketVariantId =
+            await getWinterJacketVariant();
+
+          items.push({
+            id: jacketVariantId,
+            quantity: 1
+          });
+        }
+
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+          },
+          body: JSON.stringify({ items })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.description ||
+            'Unable to add product to cart.'
+          );
+        }
+
+        message.textContent =
+          requiresWinterJacket(selectedVariant)
+            ? 'Added to cart with Soft Winter Jacket.'
+            : 'Added to cart.';
+
+        addButton.disabled = false;
+
+        /*
+          Dispatch a Shopify-friendly cart update event.
+          This allows theme cart components to refresh.
+        */
+        document.dispatchEvent(
+          new CustomEvent('cart:updated')
+        );
+
+      } catch (error) {
+        console.error(error);
+
+        message.textContent =
+          error.message || 'Something went wrong.';
+
+        addButton.disabled = false;
+      }
+    };
+
+    section
+      .querySelectorAll('[data-product-index]')
+      .forEach((card) => {
+        card.addEventListener('click', () => {
+          openModal(
+            Number(card.dataset.productIndex)
+          );
+        });
+      });
+
+    section
+      .querySelectorAll('[data-modal-close]')
+      .forEach((element) => {
+        element.addEventListener('click', closeModal);
+      });
+
+    addButton.addEventListener('click', addToCart);
+
+    document.addEventListener('keydown', (event) => {
+      if (
+        event.key === 'Escape' &&
+        !modal.hidden
+      ) {
+        closeModal();
+      }
+    });
+  })();
+</script>
+
+<style>
+  #CustomProductGrid-{{ section.id }} {
+    padding: 70px 5%;
+    background: #ffffff;
+    box-sizing: border-box;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .custom-product-grid__header {
+    margin-bottom: 28px;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .custom-product-grid__header h2 {
+    margin: 0;
+    color: #171331;
+    font-size: clamp(28px, 3vw, 42px);
+    line-height: 1.15;
+    font-weight: 500;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .custom-product-grid__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .custom-product-grid__card {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .custom-product-grid__image-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f3f3f3;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .custom-product-grid__image-wrapper img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .custom-product-grid__card:hover img {
+    transform: scale(1.03);
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .custom-product-grid__plus {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: #ffffff;
+    color: #171331;
+
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    transition:
+      transform 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .custom-product-grid__card:hover
+    .custom-product-grid__plus {
+    transform: scale(1.08);
+  }
+
+  /* Modal */
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal[hidden] {
+    display: none;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__dialog {
+    position: relative;
+    z-index: 2;
+
+    width: min(900px, calc(100% - 32px));
+    max-height: calc(100vh - 40px);
+
+    margin: 20px auto;
+    overflow-y: auto;
+
+    background: #ffffff;
+    box-sizing: border-box;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    z-index: 3;
+
+    width: 36px;
+    height: 36px;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: #ffffff;
+    color: #171331;
+
+    font-size: 28px;
+    line-height: 1;
+
+    cursor: pointer;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__image {
+    min-height: 500px;
+    background: #f3f3f3;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__image img {
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    display: block;
+    object-fit: cover;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__details {
+    padding: 50px 38px;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__details h2 {
+    margin: 0 0 16px;
+    color: #171331;
+    font-size: 30px;
+    line-height: 1.15;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__price {
+    margin-bottom: 24px;
+    color: #171331;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__description {
+    margin-bottom: 28px;
+    color: #555555;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__variant {
+    margin-bottom: 18px;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__variant label {
+    display: block;
+    margin-bottom: 7px;
+    color: #171331;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__variant select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cccccc;
+    background: #ffffff;
+    color: #171331;
+    font-size: 14px;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__add {
+    width: 100%;
+    margin-top: 10px;
+    padding: 16px;
+
+    border: 0;
+    background: #171331;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+      transform 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__add:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: #2b2550;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__add:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  #CustomProductGrid-{{ section.id }}
+    .product-modal__message {
+    min-height: 20px;
+    margin: 14px 0 0;
+    color: #171331;
+    font-size: 13px;
+  }
+
+  body.product-modal-open {
+    overflow: hidden;
+  }
+
+  @media screen and (max-width: 749px) {
+    #CustomProductGrid-{{ section.id }} {
+      padding: 45px 16px;
+    }
+
+    #CustomProductGrid-{{ section.id }}
+      .custom-product-grid__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+    }
+
+    #CustomProductGrid-{{ section.id }}
+      .custom-product-grid__plus {
+      right: 8px;
+      bottom: 8px;
+      width: 30px;
+      height: 30px;
+      font-size: 21px;
+    }
+
+    #CustomProductGrid-{{ section.id }}
+      .product-modal__content {
+      grid-template-columns: 1fr;
+    }
+
+    #CustomProductGrid-{{ section.id }}
+      .product-modal__image {
+      min-height: 280px;
+    }
+
+    #CustomProductGrid-{{ section.id }}
+      .product-modal__image img {
+      min-height: 280px;
+      max-height: 360px;
+    }
+
+    #CustomProductGrid-{{ section.id }}
+      .product-modal__details {
+      padding: 30px 24px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Custom Product Grid",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Grid heading",
+      "default": "Tisso vison in the wild"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Custom Product Grid",
+      "blocks": [
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
