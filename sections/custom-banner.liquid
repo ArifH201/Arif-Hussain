@@ -1,0 +1,111 @@
+<section
+  class="custom-banner"
+  id="CustomBanner-{{ section.id }}"
+  style="--banner-bg: {{ section.settings.background_color }};"
+>
+  <div class="custom-banner__content">
+    {% if section.settings.heading != blank %}
+      <h2 class="custom-banner__heading">
+        {{ section.settings.heading | escape }}
+      </h2>
+    {% endif %}
+
+    {% if section.settings.button_text != blank %}
+      <a
+        class="custom-banner__button"
+        href="{{ section.settings.button_link }}"
+      >
+        {{ section.settings.button_text | escape }}
+      </a>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  #CustomBanner-{{ section.id }} {
+    background: var(--banner-bg);
+    width: 100%;
+    padding: 48px 24px;
+    box-sizing: border-box;
+  }
+
+  #CustomBanner-{{ section.id }} .custom-banner__content {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  #CustomBanner-{{ section.id }} .custom-banner__heading {
+    margin: 0 0 24px;
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1.15;
+    font-weight: 700;
+  }
+
+  #CustomBanner-{{ section.id }} .custom-banner__button {
+    display: inline-block;
+    padding: 12px 28px;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    text-decoration: none;
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      background-color 0.25s ease;
+  }
+
+  #CustomBanner-{{ section.id }} .custom-banner__button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  }
+
+  @media screen and (max-width: 749px) {
+    #CustomBanner-{{ section.id }} {
+      padding: 36px 18px;
+    }
+
+    #CustomBanner-{{ section.id }} .custom-banner__heading {
+      font-size: 30px;
+    }
+
+    #CustomBanner-{{ section.id }} .custom-banner__button {
+      padding: 11px 22px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Custom Banner",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Banner text",
+      "default": "Browse our latest products"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop all"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#D62828"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Banner"
+    }
+  ]
+}
+{% endschema %}
