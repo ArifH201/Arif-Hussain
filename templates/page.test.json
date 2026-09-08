@@ -7,16 +7,73 @@
  * made to this file may be overwritten.
  * ------------------------------------------------------------
  */
-{"sections": {
-  "custom_banner":{
-    "type": "custom-banner",
-    "settings":{}
-  },
- 
+{
+  "sections": {
+    "custom_banner": {
+      "type": "custom-banner",
+      "settings": {
+        "heading": "The Gift Guide",
+        "description": "<p>Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season.</p>",
+        "button_text": "SHOP NOW",
+        "button_link": ""
+      }
+    },
+    "custom_product_grid_XPBNKJ": {
+      "type": "custom-product-grid",
+      "blocks": {
+        "product_TBiMhL": {
+          "type": "product",
+          "settings": {
+            "product": "ocean-blue-shirt"
+          }
+        },
+        "product_BEGmXh": {
+          "type": "product",
+          "settings": {
+            "product": "classic-varsity-top"
+          }
+        },
+        "product_mzEA3U": {
+          "type": "product",
+          "settings": {
+            "product": "yellow-wool-jumper"
+          }
+        },
+        "product_j8dTkT": {
+          "type": "product",
+          "settings": {
+            "product": "floral-white-top"
+          }
+        },
+        "product_ykdYiW": {
+          "type": "product",
+          "settings": {
+            "product": "striped-silk-blouse"
+          }
+        },
+        "product_3cQ7Ca": {
+          "type": "product",
+          "settings": {
+            "product": "classic-leather-jacket"
+          }
+        }
+      },
+      "block_order": [
+        "product_TBiMhL",
+        "product_BEGmXh",
+        "product_mzEA3U",
+        "product_j8dTkT",
+        "product_ykdYiW",
+        "product_3cQ7Ca"
+      ],
+      "name": "Custom Product Grid",
+      "settings": {
+        "heading": "Tisso vison in the wild"
+      }
+    }
   },
   "order": [
     "custom_banner",
-    
+    "custom_product_grid_XPBNKJ"
   ]
 }
- 
