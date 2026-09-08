@@ -131,39 +131,23 @@
   #CustomBanner-{{ section.id }} {
     position: relative;
     min-height: 0;
-    height: 520px;
-    overflow: hidden;
+    height: auto;
     background: #ffffff;
+    overflow: hidden;
+    padding: 28px 0 0;
   }
 
-  #CustomBanner-{{ section.id }} .custom-banner__artwork {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 68%;
-    z-index: 1;
-  }
-
-  #CustomBanner-{{ section.id }} .custom-banner__artwork img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    object-position: center center;
-  }
-
+  /* Heading + description first */
   #CustomBanner-{{ section.id }} .custom-banner__content {
-    position: absolute;
-    top: 28px;
-    left: 20px;
-    right: 20px;
+    position: relative;
+    left: auto;
+    top: auto;
+    bottom: auto;
+    transform: none;
     width: auto;
     max-width: none;
-    padding: 0;
+    padding: 0 20px 24px;
     text-align: center;
-    transform: none;
     z-index: 2;
   }
 
@@ -175,20 +159,42 @@
   }
 
   #CustomBanner-{{ section.id }} .custom-banner__description {
-    max-width: 250px;
+    max-width: 270px;
     margin: 0 auto;
     font-size: 11px;
-    line-height: 1.4;
+    line-height: 1.45;
   }
 
+  /* Artwork comes underneath */
+  #CustomBanner-{{ section.id }} .custom-banner__artwork {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+    height: 330px;
+    z-index: 1;
+  }
+
+  #CustomBanner-{{ section.id }} .custom-banner__artwork img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  /* Button sits ON the artwork */
   #CustomBanner-{{ section.id }} .custom-banner__button {
     position: absolute;
-    left: 0;
-    top: 180px;
+    left: 20px;
+    bottom: 25px;
+    z-index: 3;
+
     min-width: 120px;
-    padding: 11px 14px;
+    padding: 11px 15px;
     font-size: 11px;
-    text-align: left;
   }
 
   #CustomBanner-{{ section.id }} .custom-banner__arrow {
