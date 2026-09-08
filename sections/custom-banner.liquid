@@ -4,10 +4,10 @@
 >
   <div class="custom-banner__artwork">
     <img
-  src="{{ 'gift-guide-artwork_png.png' | asset_url }}"
-  alt=""
-  loading="eager"
->
+      src="{{ 'gift-guide-artwork.png' | asset_url }}"
+      alt=""
+      loading="eager"
+    >
   </div>
 
   <div class="custom-banner__content">
@@ -40,15 +40,17 @@
     position: relative;
     overflow: hidden;
     min-height: 700px;
-    background: #f7f5f2;
-    display: flex;
-    align-items: center;
+    background: #ffffff;
     box-sizing: border-box;
   }
 
+  /* Figma artwork */
   #CustomBanner-{{ section.id }} .custom-banner__artwork {
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    width: 72%;
+    height: 100%;
     z-index: 1;
   }
 
@@ -56,30 +58,35 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     display: block;
   }
 
+  /* Text positioned down and left into the white space */
   #CustomBanner-{{ section.id }} .custom-banner__content {
-    position: relative;
+    position: absolute;
+    left: 7%;
+    top: 62%;
+    transform: translateY(-50%);
     z-index: 2;
-    width: 42%;
-    max-width: 600px;
-    padding: 80px 0 80px 7%;
+    width: 40%;
+    max-width: 520px;
     box-sizing: border-box;
   }
 
   #CustomBanner-{{ section.id }} .custom-banner__heading {
     margin: 0 0 24px;
-    color: #000000;
+    color: #171331;
     font-size: clamp(42px, 5vw, 72px);
     line-height: 1.05;
     font-weight: 500;
+    letter-spacing: -1px;
   }
 
   #CustomBanner-{{ section.id }} .custom-banner__description {
     max-width: 390px;
-    margin-bottom: 32px;
-    color: #000000;
+    margin: 0 0 32px;
+    color: #555555;
     font-size: 16px;
     line-height: 1.5;
   }
@@ -87,19 +94,24 @@
   #CustomBanner-{{ section.id }} .custom-banner__button {
     display: inline-flex;
     align-items: center;
+    justify-content: space-between;
     gap: 22px;
-    padding: 14px 22px;
+    min-width: 145px;
+    padding: 14px 20px;
     background: #171331;
     color: #ffffff;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
+    box-sizing: border-box;
+
     transition:
       transform 0.25s ease,
       background-color 0.25s ease,
       gap 0.25s ease;
   }
 
+  /* Button animation required by the test */
   #CustomBanner-{{ section.id }} .custom-banner__button:hover {
     transform: translateY(-3px);
     gap: 30px;
@@ -111,37 +123,47 @@
     line-height: 1;
   }
 
+  /* Mobile */
   @media screen and (max-width: 749px) {
     #CustomBanner-{{ section.id }} {
-      min-height: 620px;
-      align-items: flex-end;
+      min-height: 680px;
+    }
+
+    #CustomBanner-{{ section.id }} .custom-banner__artwork {
+      width: 100%;
+      height: 100%;
+      right: 0;
     }
 
     #CustomBanner-{{ section.id }} .custom-banner__artwork img {
+      object-fit: cover;
       object-position: center top;
     }
 
     #CustomBanner-{{ section.id }} .custom-banner__content {
-      width: 100%;
+      left: 24px;
+      right: 24px;
+      top: auto;
+      bottom: 45px;
+      transform: none;
+      width: auto;
       max-width: none;
-      padding: 320px 24px 45px;
-      background: linear-gradient(
-        to bottom,
-        transparent 0%,
-        rgba(247, 245, 242, 0.85) 35%,
-        #f7f5f2 65%
-      );
+      padding: 0;
     }
 
     #CustomBanner-{{ section.id }} .custom-banner__heading {
       font-size: 42px;
-      margin-top: 2rem;
+      margin-bottom: 18px;
     }
 
     #CustomBanner-{{ section.id }} .custom-banner__description {
+      max-width: 360px;
       font-size: 14px;
-      margin-top: 2rem;
       margin-bottom: 24px;
+    }
+
+    #CustomBanner-{{ section.id }} .custom-banner__button {
+      padding: 13px 18px;
     }
   }
 </style>
